@@ -1,5 +1,8 @@
 let draggedEl;
 let ghostEl;
+let positionY;
+let positionX;
+let elemSize;
 
 const itemsEl = document.querySelector('.items-area');
 const allItems = document.querySelectorAll('.items-item');
@@ -27,6 +30,10 @@ itemsEl.addEventListener('mousedown', (evt) => {
   document.body.appendChild(ghostEl);
   ghostEl.style.left = `${evt.pageX}px`;
   ghostEl.style.top = `${evt.pageY}px`;
+  elemSize = evt.target.getBoundingClientRect();
+  positionY = evt.clientY - elemSize.top;
+  positionX = evt.clientX - elemSize.left;
+  ghostEl.style.width = `${elemSize.width}px`;
 });
 
 itemsEl.addEventListener('mousemove', (evt) => {
@@ -34,8 +41,8 @@ itemsEl.addEventListener('mousemove', (evt) => {
   if (!draggedEl) {
     return;
   }
-  ghostEl.style.left = `${evt.pageX}px`;
-  ghostEl.style.top = `${evt.pageY}px`;
+  ghostEl.style.left = `${evt.pageX - positionX}px`;
+  ghostEl.style.top = `${evt.pageY - positionY}px`;
 });
 
 itemsEl.addEventListener('mouseup', (evt) => {
@@ -43,8 +50,10 @@ itemsEl.addEventListener('mouseup', (evt) => {
     return;
   }
   let closest = document.elementFromPoint(evt.clientX, evt.clientY);
-  closest = closest.closest('.items');
-  closest.appendChild(draggedEl);
+  if (closest.classList.contains('items-item')) {
+    closest.insertAdjacentElement('afterend', draggedEl);
+  }
+  
   document.body.removeChild(ghostEl);
   evt.target.classList.remove('bottom-space');
   ghostEl = null;
